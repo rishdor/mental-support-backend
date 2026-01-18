@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace mental_support.Controllers;
+namespace Api.Controllers;
 
 [ApiController]
 public class HealthController : ControllerBase
