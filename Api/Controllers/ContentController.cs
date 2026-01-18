@@ -43,4 +43,19 @@ public class ContentController : ControllerBase
             return NotFound(new { message = "Content item not found." });
         }
     }
+
+    [Route("{id}/audios")]
+    [HttpGet]
+    public IActionResult GetAudioVariantsByContentItemId([FromRoute] Guid id)
+    {
+        try
+        {
+            var audioVariants = _contentService.GetAudioVariantsByContentItemId(id);
+            return Ok(audioVariants);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { message = "Content item not found." });
+        }
+    }
 }
