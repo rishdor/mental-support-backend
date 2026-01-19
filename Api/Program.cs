@@ -1,4 +1,5 @@
 using Api.Data;
+using Api.Middleware;
 using Api.Services;
 using DotNetEnv;
 using FirebaseAdmin;
@@ -26,21 +27,28 @@ if (FirebaseApp.DefaultInstance == null)
     if (!string.IsNullOrWhiteSpace(firebaseCredPath) && File.Exists(firebaseCredPath))
     {
         Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", firebaseCredPath);
+        var credential = GoogleCredential.GetApplicationDefault();
+
+        FirebaseApp.Create(new AppOptions
+        {
+            Credential = credential
+        });
     }
-
-    var credential = GoogleCredential.GetApplicationDefault();
-
-    FirebaseApp.Create(new AppOptions
+    else if (builder.Environment.IsDevelopment())
     {
-        Credential = credential
-    });
+        Console.WriteLine("Firebase credentials not found. Running in development mode without Firebase authentication.");
+    }
+    else
+    {
+        throw new InvalidOperationException("Firebase credentials are required in production.");
+    }
 }
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 builder.Services.AddScoped<ContentService>();
-builder.Services.AddScoped<FirebaseAuthService>();
+builder.Services.AddScoped<UserResolutionService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -62,6 +70,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseRouting();
+app.UseMiddleware<FirebaseAuthMiddleware>();
 app.MapControllers();
 
 app.Run();
