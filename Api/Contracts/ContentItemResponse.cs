@@ -6,4 +6,5 @@ public class ContentItemResponse
     public string Description { get; set; } = null!;
     public string SituationTag { get; set; } = null!;
     public bool IsPremium { get; set; }
+    public AudioVariantResponse? AudioVariant { get; set; } = new();
 }

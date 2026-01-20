@@ -13,7 +13,7 @@ public class UserResolutionService
         _context = context;
     }
 
-    public async Task<User> ResolveAsync(HttpContext context)
+    public async Task<(User user, bool shouldShowOnboarding)> ResolveAsync(HttpContext context)
     {
         var firebaseUid = context.Items["FirebaseUid"] as string;
 
@@ -40,7 +40,7 @@ public class UserResolutionService
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return user;
+            return (user, true);
         }
 
         if (!string.IsNullOrWhiteSpace(email) && user.Email != email)
@@ -49,6 +49,6 @@ public class UserResolutionService
             await _context.SaveChangesAsync();
         }
 
-        return user;
+        return (user, false);
     }
 }

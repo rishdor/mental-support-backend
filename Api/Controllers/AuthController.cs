@@ -19,8 +19,10 @@ public class AuthController : ControllerBase
     [HttpGet("me")]
     public async Task<IActionResult> GetCurrentUser()
     {
-        var user = await _userResolutionService.ResolveAsync(HttpContext);
+        var result = await _userResolutionService.ResolveAsync(HttpContext);
+        var user = result.user.ToResponse();
+        user.ShouldShowOnboarding = result.shouldShowOnboarding;
 
-        return Ok(user.ToResponse());
+        return Ok(user);
     }
 }

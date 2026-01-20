@@ -1,36 +1,22 @@
 using Api.Contracts;
 using Api.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services;
 
 public class ContentService
 {
-    private readonly AppDbContext _dbContext;
+    private readonly AppDbContext _context;
 
-    public ContentService(AppDbContext dbContext)
+    public ContentService(AppDbContext context)
     {
-        _dbContext = dbContext;
+        _context = context;
     }
 
-    public IEnumerable<ContentItemResponse> GetAllContentItems()
+    public async Task<List<ContentItemResponse>> GetAllAsync(Guid userId)
     {
-        return _dbContext.ContentItems
+        return await _context.ContentItems
             .Select(ci => new ContentItemResponse
-            {
-                Id = ci.Id,
-                Title = ci.Title,
-                Description = ci.Description,
-                SituationTag = ci.SituationTag,
-                IsPremium = ci.IsPremium
-            })
-            .ToList();
-    }
-
-    public ContentItemDetails GetContentItemById(Guid id)
-    {
-        var contentItem = _dbContext.ContentItems
-            .Where(ci => ci.Id == id)
-            .Select(ci => new ContentItemDetails
             {
                 Id = ci.Id,
                 Title = ci.Title,
@@ -47,27 +33,36 @@ public class ContentService
                     })
                     .FirstOrDefault()
             })
-            .FirstOrDefault();
-
-        if (contentItem == null || contentItem.AudioVariant == null)
-        {
-            throw new KeyNotFoundException("Content item not found.");
-        }
-
-        return contentItem;
+            .ToListAsync();
     }
 
-    public IEnumerable<AudioVariantResponse> GetAudioVariantsByContentItemId(Guid contentItemId)
+    public async Task<ContentItemResponse?> GetByIdAsync(Guid id, Guid userId)
     {
-        var contentItem = _dbContext.ContentItems
-            .FirstOrDefault(ci => ci.Id == contentItemId);
+        return await _context.ContentItems
+            .Where(ci => ci.Id == id)
+            .Select(ci => new ContentItemResponse
+            {
+                Id = ci.Id,
+                Title = ci.Title,
+                Description = ci.Description,
+                SituationTag = ci.SituationTag,
+                IsPremium = ci.IsPremium,
+                AudioVariant = ci.AudioVariants
+                    .Select(av => new AudioVariantResponse
+                    {
+                        Id = av.Id,
+                        EmotionalTone = av.EmotionalTone,
+                        AudioUrl = av.AudioUrl,
+                        DurationSeconds = av.DurationSeconds
+                    })
+                    .FirstOrDefault()
+            })
+            .FirstOrDefaultAsync();
+    }
 
-        if (contentItem == null)
-        {
-            throw new KeyNotFoundException("Content item not found.");
-        }
-
-        return _dbContext.AudioVariants
+    public async Task<List<AudioVariantResponse>> GetAudiosAsync(Guid contentItemId, Guid userId)
+    {
+        return await _context.AudioVariants
             .Where(av => av.ContentItemId == contentItemId)
             .Select(av => new AudioVariantResponse
             {
@@ -76,6 +71,6 @@ public class ContentService
                 AudioUrl = av.AudioUrl,
                 DurationSeconds = av.DurationSeconds
             })
-            .ToList();
+            .ToListAsync();
     }
 }

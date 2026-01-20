@@ -4,58 +4,47 @@ using Api.Services;
 namespace Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/content")]
 public class ContentController : ControllerBase
 {
     private readonly ContentService _contentService;
-    public ContentController(ContentService contentService)
+    private readonly UserResolutionService _userResolver;
+
+    public ContentController(
+        ContentService contentService,
+        UserResolutionService userResolver)
     {
         _contentService = contentService;
-    }    
-
-    [Route("all")]
-    [HttpGet]
-    public IActionResult GetAllContentItems()
-    {
-        try
-        {
-            var contentItems = _contentService.GetAllContentItems();
-            return Ok(contentItems);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = "An error occurred while retrieving content items.", detail = ex.Message });
-            
-        }
+        _userResolver = userResolver;
     }
 
-    [Route("{id}")]
     [HttpGet]
-    public IActionResult GetContentItemById([FromRoute] Guid id)
+    public async Task<IActionResult> GetAll()
     {
-        try
-        {
-            var contentItem = _contentService.GetContentItemById(id);
-            return Ok(contentItem);
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound(new { message = "Content item not found." });
-        }
+        var result = await _userResolver.ResolveAsync(HttpContext);
+        var user = result.user;
+
+        var items = await _contentService.GetAllAsync(user.Id);
+        return Ok(items);
     }
 
-    [Route("{id}/audios")]
-    [HttpGet]
-    public IActionResult GetAudioVariantsByContentItemId([FromRoute] Guid id)
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id)
     {
-        try
-        {
-            var audioVariants = _contentService.GetAudioVariantsByContentItemId(id);
-            return Ok(audioVariants);
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound(new { message = "Content item not found." });
-        }
+        var result = await _userResolver.ResolveAsync(HttpContext);
+        var user = result.user;
+
+        var item = await _contentService.GetByIdAsync(id, user.Id);
+        return item is null ? NotFound() : Ok(item);
+    }
+
+    [HttpGet("{id:guid}/audios")]
+    public async Task<IActionResult> GetAudios(Guid id)
+    {
+        var result = await _userResolver.ResolveAsync(HttpContext);
+        var user = result.user;
+
+        var audios = await _contentService.GetAudiosAsync(id, user.Id);
+        return Ok(audios);
     }
 }
