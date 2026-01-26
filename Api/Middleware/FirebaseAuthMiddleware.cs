@@ -1,4 +1,5 @@
 using FirebaseAdmin.Auth;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Api.Middleware;
 
@@ -11,12 +12,22 @@ public class FirebaseAuthMiddleware
         _next = next;
     }
 
-    public async Task InvokeAsync(HttpContext context)
+   public async Task InvokeAsync(HttpContext context)
     {
+        var endpoint = context.GetEndpoint();
+        var allowAnonymous =
+            endpoint?.Metadata.GetMetadata<IAllowAnonymous>() != null;
+
         var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
 
         if (string.IsNullOrWhiteSpace(authHeader) || !authHeader.StartsWith("Bearer "))
         {
+            if (allowAnonymous)
+            {
+                await _next(context);
+                return;
+            }
+
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
             await context.Response.WriteAsJsonAsync(new { error = "Unauthorized" });
             return;
@@ -26,7 +37,8 @@ public class FirebaseAuthMiddleware
 
         try
         {
-            var decoded = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+            var decoded =
+                await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
 
             context.Items["FirebaseUid"] = decoded.Uid;
             context.Items["FirebaseEmail"] =
@@ -39,7 +51,9 @@ public class FirebaseAuthMiddleware
         catch
         {
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            await context.Response.WriteAsJsonAsync(new { error = "Invalid or expired token" });
+            await context.Response.WriteAsJsonAsync(
+                new { error = "Invalid or expired token" }
+            );
         }
     }
 }

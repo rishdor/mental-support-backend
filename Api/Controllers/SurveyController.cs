@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Api.Services;
 using Api.Contracts;
+using Microsoft.AspNetCore.Authorization;
+
 namespace Api.Controllers;
 
 [ApiController]
@@ -18,9 +20,12 @@ public class SurveyController : ControllerBase
         _userResolver = userResolver;
     }
 
+    [AllowAnonymous]
     [HttpPost("submit")]
     public async Task<IActionResult> SubmitSurvey([FromBody] SurveyRequest request)
     {
+        Console.WriteLine("SURVEY HIT"); // TEMP
+
         var user = await _userResolver.ResolveAsync(HttpContext);
 
         await _surveyService.LogSurveyResponse(user.Id, request);
