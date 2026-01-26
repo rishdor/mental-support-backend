@@ -21,8 +21,7 @@ public class ContentController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var result = await _userResolver.ResolveAsync(HttpContext);
-        var user = result.user;
+        var user = await _userResolver.ResolveAsync(HttpContext);
 
         var items = await _contentService.GetAllAsync(user.Id);
         return Ok(items);
@@ -31,8 +30,7 @@ public class ContentController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        var result = await _userResolver.ResolveAsync(HttpContext);
-        var user = result.user;
+        var user = await _userResolver.ResolveAsync(HttpContext);
 
         var item = await _contentService.GetByIdAsync(id, user.Id);
         return item is null ? NotFound() : Ok(item);
@@ -41,8 +39,7 @@ public class ContentController : ControllerBase
     [HttpGet("{id:guid}/audios")]
     public async Task<IActionResult> GetAudios(Guid id)
     {
-        var result = await _userResolver.ResolveAsync(HttpContext);
-        var user = result.user;
+        var user = await _userResolver.ResolveAsync(HttpContext);
 
         var audios = await _contentService.GetAudiosAsync(id, user.Id);
         return Ok(audios);

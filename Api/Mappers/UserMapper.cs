@@ -9,6 +9,7 @@ public static class UserMapper
         => new()
         {
             Id = user.Id,
-            Email = user.Email ?? string.Empty
+            Email = user.Email ?? string.Empty,
+            ShouldShowOnboarding = !user.HasCompletedOnboarding
         };
 }
