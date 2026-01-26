@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Api.Models;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Api.Data;
 
@@ -20,6 +21,7 @@ public class AppDbContext : DbContext
             e.Property(e => e.FirebaseUid).IsRequired();
             e.Property(e => e.Email);
             e.Property(e => e.CreatedAt).IsRequired();
+            e.Property(e => e.HasCompletedOnboarding).IsRequired();
         });
 
         modelBuilder.Entity<ContentItem>(e =>
@@ -43,6 +45,17 @@ public class AppDbContext : DbContext
             e.HasOne(e => e.ContentItem)
                   .WithMany(c => c.AudioVariants)
                   .HasForeignKey(e => e.ContentItemId);
+        });
+
+        modelBuilder.Entity<Survey>(e =>
+        {
+            e.HasKey(e => e.Id);
+            e.Property(e => e.UserId).IsRequired();
+            e.Property(e => e.ContentId).IsRequired();
+            e.Property(e => e.ValueSignal).IsRequired();
+            e.Property(e => e.ReturnIntent).IsRequired();
+            e.Property(e => e.Feedback);
+            e.Property(e => e.CreatedAt).IsRequired();
         });
     }
 }

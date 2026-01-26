@@ -6,4 +6,5 @@ public class User
     public string FirebaseUid { get; set; } = null!;
     public string? Email { get; set; }
     public DateTime CreatedAt { get; set; }
+    public bool HasCompletedOnboarding { get; set; } = false;
 }
