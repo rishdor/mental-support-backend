@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Api.Services;
 using Api.Contracts;
-
 namespace Api.Controllers;
 
 [ApiController]
@@ -9,24 +8,22 @@ namespace Api.Controllers;
 public class SurveyController : ControllerBase
 {
     private readonly SurveyService _surveyService;
+    private readonly UserResolutionService _userResolver;
 
     public SurveyController(
-        SurveyService surveyService)
+        SurveyService surveyService,
+        UserResolutionService userResolver)
     {
         _surveyService = surveyService;
+        _userResolver = userResolver;
     }
 
-    [HttpPost]
-    public async Task<IActionResult> SubmitSurvey( [FromBody] SurveyRequest request, HttpContext context)
+    [HttpPost("submit")]
+    public async Task<IActionResult> SubmitSurvey([FromBody] SurveyRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.ContentId))
-        {
-            return BadRequest("ContentId is required");
-        }
+        var user = await _userResolver.ResolveAsync(HttpContext);
 
-        var userId = context.Items["FirebaseUid"] as string;
-
-        await _surveyService.LogSurveyResponse(userId, request);
+        await _surveyService.LogSurveyResponse(user.Id, request);
 
         return NoContent();
     }

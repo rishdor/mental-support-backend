@@ -23,6 +23,7 @@ public class UserResolutionService
         }
 
         var email = context.Items["FirebaseEmail"] as string;
+        var isAnonymous = string.IsNullOrWhiteSpace(email);
 
         var user = await _context.Users
             .SingleOrDefaultAsync(u => u.FirebaseUid == firebaseUid);
@@ -34,6 +35,8 @@ public class UserResolutionService
                 Id = Guid.NewGuid(),
                 FirebaseUid = firebaseUid,
                 Email = email,
+                IsAnonymous = isAnonymous,
+                HasCompletedOnboarding = false,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -43,10 +46,22 @@ public class UserResolutionService
             return user;
         }
 
-        if (!string.IsNullOrWhiteSpace(email) && user.Email != email)
+        var needsUpdate = false;
+
+        if (user.Email != email)
         {
             user.Email = email;
-            user.HasCompletedOnboarding = true;
+            needsUpdate = true;
+        }
+
+        if (user.IsAnonymous != isAnonymous)
+        {
+            user.IsAnonymous = isAnonymous;
+            needsUpdate = true;
+        }
+
+        if (needsUpdate)
+        {
             await _context.SaveChangesAsync();
         }
 

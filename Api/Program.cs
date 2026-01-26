@@ -49,6 +49,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<ContentService>();
 builder.Services.AddScoped<UserResolutionService>();
+builder.Services.AddScoped<SurveyService>();
+builder.Services.AddScoped<OnboardingService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

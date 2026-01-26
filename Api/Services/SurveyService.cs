@@ -1,8 +1,6 @@
 using Api.Contracts;
 using Api.Data;
 using Api.Models;
-using Microsoft.EntityFrameworkCore;
-
 namespace Api.Services;
 
 public class SurveyService
@@ -14,12 +12,12 @@ public class SurveyService
         _context = context;
     }
 
-    public async Task LogSurveyResponse(string? userId, SurveyRequest request)
+    public async Task LogSurveyResponse(Guid userId, SurveyRequest request)
     {
         var survey = new Survey
         {
             UserId = userId,
-            ContentId = request.ContentId,
+            ContentItemId = request.ContentItemId,
             ValueSignal = request.ValueSignal,
             ReturnIntent = request.ReturnIntent,
             Feedback = request.Feedback,
