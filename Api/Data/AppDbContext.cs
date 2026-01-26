@@ -11,7 +11,7 @@ public class AppDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<ContentItem> ContentItems => Set<ContentItem>();
     public DbSet<AudioVariant> AudioVariants => Set<AudioVariant>();
-
+    public DbSet<Survey> Surveys => Set<Survey>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
