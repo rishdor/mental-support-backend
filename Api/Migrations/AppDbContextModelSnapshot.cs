@@ -84,9 +84,8 @@ namespace Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("ContentId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("ContentItemId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -98,9 +97,8 @@ namespace Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ValueSignal")
                         .IsRequired()
@@ -108,7 +106,11 @@ namespace Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Survey");
+                    b.HasIndex("ContentItemId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Surveys");
                 });
 
             modelBuilder.Entity("Api.Models.User", b =>
@@ -130,6 +132,9 @@ namespace Api.Migrations
                     b.Property<bool>("HasCompletedOnboarding")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsAnonymous")
+                        .HasColumnType("boolean");
+
                     b.HasKey("Id");
 
                     b.ToTable("Users");
@@ -144,6 +149,21 @@ namespace Api.Migrations
                         .IsRequired();
 
                     b.Navigation("ContentItem");
+                });
+
+            modelBuilder.Entity("Api.Models.Survey", b =>
+                {
+                    b.HasOne("Api.Models.ContentItem", null)
+                        .WithMany()
+                        .HasForeignKey("ContentItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Api.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Api.Models.ContentItem", b =>

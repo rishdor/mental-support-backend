@@ -22,6 +22,7 @@ public class AppDbContext : DbContext
             e.Property(e => e.Email);
             e.Property(e => e.CreatedAt).IsRequired();
             e.Property(e => e.HasCompletedOnboarding).IsRequired();
+            e.Property(e => e.IsAnonymous).IsRequired();
         });
 
         modelBuilder.Entity<ContentItem>(e =>
@@ -50,12 +51,23 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Survey>(e =>
         {
             e.HasKey(e => e.Id);
-            e.Property(e => e.UserId).IsRequired();
-            e.Property(e => e.ContentId).IsRequired();
             e.Property(e => e.ValueSignal).IsRequired();
             e.Property(e => e.ReturnIntent).IsRequired();
             e.Property(e => e.Feedback);
             e.Property(e => e.CreatedAt).IsRequired();
+
+            e.Property(e => e.UserId).IsRequired();
+            e.Property(e => e.ContentItemId).IsRequired();
+
+            e.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne<ContentItem>()
+                .WithMany()
+                .HasForeignKey(e => e.ContentItemId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

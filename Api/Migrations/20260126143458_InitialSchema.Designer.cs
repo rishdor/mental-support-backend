@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260118142353_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260126143458_InitialSchema")]
+    partial class InitialSchema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -81,6 +81,41 @@ namespace Api.Migrations
                     b.ToTable("ContentItems");
                 });
 
+            modelBuilder.Entity("Api.Models.Survey", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ContentItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Feedback")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ReturnIntent")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ValueSignal")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContentItemId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Surveys");
+                });
+
             modelBuilder.Entity("Api.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -90,9 +125,18 @@ namespace Api.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Email")
+                        .HasColumnType("text");
+
                     b.Property<string>("FirebaseUid")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("HasCompletedOnboarding")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsAnonymous")
+                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -108,6 +152,21 @@ namespace Api.Migrations
                         .IsRequired();
 
                     b.Navigation("ContentItem");
+                });
+
+            modelBuilder.Entity("Api.Models.Survey", b =>
+                {
+                    b.HasOne("Api.Models.ContentItem", null)
+                        .WithMany()
+                        .HasForeignKey("ContentItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Api.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Api.Models.ContentItem", b =>
