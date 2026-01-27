@@ -1,9 +1,10 @@
 using Api.Data;
 using Api.Models;
+using Api.Interfaces;
 
 namespace Api.Services;
 
-public class OnboardingService
+public class OnboardingService : IOnboardingService
 {
     private readonly AppDbContext _context;
 

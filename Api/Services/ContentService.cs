@@ -1,10 +1,11 @@
 using Api.Contracts;
 using Api.Data;
 using Microsoft.EntityFrameworkCore;
+using Api.Interfaces;
 
 namespace Api.Services;
 
-public class ContentService
+public class ContentService : IContentService
 {
     private readonly AppDbContext _context;
 

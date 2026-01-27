@@ -1,10 +1,11 @@
 using Api.Data;
 using Api.Models;
 using Microsoft.EntityFrameworkCore;
+using Api.Interfaces;
 
 namespace Api.Services;
 
-public class UserResolutionService
+public class UserResolutionService : IUserResolutionService
 {
     private readonly AppDbContext _context;
 

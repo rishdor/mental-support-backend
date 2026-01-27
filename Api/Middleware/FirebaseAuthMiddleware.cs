@@ -1,15 +1,18 @@
 using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 
 namespace Api.Middleware;
 
 public class FirebaseAuthMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly ILogger<FirebaseAuthMiddleware> _logger;
 
-    public FirebaseAuthMiddleware(RequestDelegate next)
+    public FirebaseAuthMiddleware(RequestDelegate next, ILogger<FirebaseAuthMiddleware> logger)
     {
         _next = next;
+        _logger = logger;
     }
 
    public async Task InvokeAsync(HttpContext context)
@@ -46,10 +49,13 @@ public class FirebaseAuthMiddleware
                     ? email?.ToString()
                     : null;
 
+            _logger.LogInformation("Auth successful for UID: {Uid}", decoded.Uid);
+            
             await _next(context);
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogWarning(ex, "Auth failed: Invalid or expired token");
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
             await context.Response.WriteAsJsonAsync(
                 new { error = "Invalid or expired token" }

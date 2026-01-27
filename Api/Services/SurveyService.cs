@@ -1,9 +1,11 @@
 using Api.Contracts;
 using Api.Data;
 using Api.Models;
+using Api.Interfaces;
+
 namespace Api.Services;
 
-public class SurveyService
+public class SurveyService : ISurveyService
 {
     private readonly AppDbContext _context;
 

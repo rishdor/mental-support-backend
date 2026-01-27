@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Api.Services;
+using Api.Interfaces;
 
 namespace Api.Controllers;
 
@@ -7,12 +7,12 @@ namespace Api.Controllers;
 [Route("api/content")]
 public class ContentController : ControllerBase
 {
-    private readonly ContentService _contentService;
-    private readonly UserResolutionService _userResolver;
+    private readonly IContentService _contentService;
+    private readonly IUserResolutionService _userResolver;
 
     public ContentController(
-        ContentService contentService,
-        UserResolutionService userResolver)
+        IContentService contentService,
+        IUserResolutionService userResolver)
     {
         _contentService = contentService;
         _userResolver = userResolver;

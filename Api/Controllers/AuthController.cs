@@ -1,7 +1,6 @@
-using Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Api.Mappers;
-using Api.Services;
+using Api.Interfaces;
 
 namespace Api.Controllers;
 
@@ -9,9 +8,9 @@ namespace Api.Controllers;
 [Route("api/auth")]
 public class AuthController : ControllerBase
 {
-    private readonly UserResolutionService _userResolutionService;
+    private readonly IUserResolutionService _userResolutionService;
 
-    public AuthController(UserResolutionService userResolutionService)
+    public AuthController(IUserResolutionService userResolutionService)
     {
         _userResolutionService = userResolutionService;
     }

@@ -5,7 +5,7 @@ using DotNetEnv;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.EntityFrameworkCore;
-using System.IO;
+using Api.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,10 +47,10 @@ if (FirebaseApp.DefaultInstance == null)
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-builder.Services.AddScoped<ContentService>();
-builder.Services.AddScoped<UserResolutionService>();
-builder.Services.AddScoped<SurveyService>();
-builder.Services.AddScoped<OnboardingService>();
+builder.Services.AddScoped<IContentService, ContentService>();
+builder.Services.AddScoped<IUserResolutionService, UserResolutionService>();
+builder.Services.AddScoped<ISurveyService, SurveyService>();
+builder.Services.AddScoped<IOnboardingService, OnboardingService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -58,6 +58,11 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await context.Database.MigrateAsync();
+}
 if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();

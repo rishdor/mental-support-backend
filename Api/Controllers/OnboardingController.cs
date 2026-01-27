@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Api.Services;
+using Api.Interfaces;
 
 namespace Api.Controllers;
 
@@ -7,12 +7,12 @@ namespace Api.Controllers;
 [Route("api/onboarding")]
 public class OnboardingController : ControllerBase
 {
-    private readonly UserResolutionService _userResolver;
-    private readonly OnboardingService _onboardingService;
+    private readonly IUserResolutionService _userResolver;
+    private readonly IOnboardingService _onboardingService;
 
     public OnboardingController(
-        UserResolutionService userResolver,
-        OnboardingService onboardingService)
+        IUserResolutionService userResolver,
+        IOnboardingService onboardingService)
     {
         _userResolver = userResolver;
         _onboardingService = onboardingService;

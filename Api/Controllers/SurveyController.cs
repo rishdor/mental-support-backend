@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Api.Services;
+using Api.Interfaces;
 using Api.Contracts;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Api.Controllers;
 
@@ -9,22 +8,24 @@ namespace Api.Controllers;
 [Route("api/survey")]
 public class SurveyController : ControllerBase
 {
-    private readonly SurveyService _surveyService;
-    private readonly UserResolutionService _userResolver;
+    private readonly ISurveyService _surveyService;
+    private readonly IUserResolutionService _userResolver;
+    private readonly ILogger<SurveyController> _logger;
 
     public SurveyController(
-        SurveyService surveyService,
-        UserResolutionService userResolver)
+        ISurveyService surveyService,
+        IUserResolutionService userResolver,
+        ILogger<SurveyController> logger)
     {
         _surveyService = surveyService;
         _userResolver = userResolver;
+        _logger = logger;
     }
 
-    [AllowAnonymous]
     [HttpPost("submit")]
     public async Task<IActionResult> SubmitSurvey([FromBody] SurveyRequest request)
     {
-        Console.WriteLine("SURVEY HIT"); // TEMP
+        _logger.LogInformation("Survey submission received"); 
 
         var user = await _userResolver.ResolveAsync(HttpContext);
 
