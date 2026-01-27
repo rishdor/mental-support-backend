@@ -19,6 +19,9 @@ public class AppDbContext : DbContext
         {
             e.HasKey(e => e.Id);
             e.Property(e => e.FirebaseUid).IsRequired();
+
+            e.HasIndex(e => e.FirebaseUid).IsUnique();
+
             e.Property(e => e.Email);
             e.Property(e => e.CreatedAt).IsRequired();
             e.Property(e => e.HasCompletedOnboarding).IsRequired();
