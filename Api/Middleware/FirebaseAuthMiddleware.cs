@@ -49,7 +49,7 @@ public class FirebaseAuthMiddleware
                     ? email?.ToString()
                     : null;
 
-            _logger.LogInformation("Auth successful for UID: {Uid}", decoded.Uid);
+            _logger.LogDebug("Auth successful for UID: {Uid}", decoded.Uid);
             
             await _next(context);
         }

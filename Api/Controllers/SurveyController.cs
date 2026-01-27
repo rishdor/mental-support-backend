@@ -25,12 +25,12 @@ public class SurveyController : ControllerBase
     [HttpPost("submit")]
     public async Task<IActionResult> SubmitSurvey([FromBody] SurveyRequest request)
     {
-        _logger.LogInformation("Survey submission received"); 
-
         var user = await _userResolver.ResolveAsync(HttpContext);
 
         await _surveyService.LogSurveyResponse(user.Id, request);
 
+        _logger.LogInformation("Survey submission received for user {UserId}", user.Id);
+        
         return NoContent();
     }
 }
