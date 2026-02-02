@@ -117,16 +117,24 @@ app.UseExceptionHandler(errorApp =>
 
 using (var scope = app.Services.CreateScope())
 {
-    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    if (context.Database.IsRelational())
+    try
     {
-        await context.Database.MigrateAsync();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        if (context.Database.IsRelational())
+        {
+            await context.Database.MigrateAsync();
+        }
+        else
+        {
+            await context.Database.EnsureCreatedAsync();
+        }
     }
-    else
+    catch (Exception ex)
     {
-        await context.Database.EnsureCreatedAsync();
+        app.Logger.LogError(ex, "Database not available at startup; continuing for demo mode.");
     }
 }
+
 if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
@@ -139,6 +147,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseHttpsRedirection();
 
 app.UseHttpLogging();
 app.UseRouting();

@@ -34,6 +34,7 @@ public class ContentService : IContentService
                     })
                     .FirstOrDefault()
             })
+            .Where(ci => ci.IsPremium == false) // for demo simplicity, only non-premium content is returned
             .ToListAsync();
     }
 
