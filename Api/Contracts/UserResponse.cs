@@ -1,7 +1,6 @@
 namespace Api.Contracts;
-public class UserResponse
-{
-    public Guid Id { get; set; }
-    public string Email { get; set; } = string.Empty;
-    public bool ShouldShowOnboarding { get; set; } 
-}
+public record UserResponse(
+    Guid Id,
+    bool ShouldShowOnboarding,
+    string? Email
+);

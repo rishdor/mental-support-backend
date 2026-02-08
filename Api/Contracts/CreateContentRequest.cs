@@ -1,9 +1,11 @@
 namespace Api.Contracts;
-public record ContentItemResponse(
-    Guid Id,
+
+public record CreateContentRequest(
     string Title,
     string Description,
     string SituationTag,
     bool IsPremium,
-    AudioVariantResponse? AudioVariant
+    string AudioUrl,
+    int DurationSeconds,
+    string EmotionalTone
 );
