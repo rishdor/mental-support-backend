@@ -1,8 +1,9 @@
 using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
+using System.Security.Claims;
 
-namespace Api.Middleware;
+namespace Api.Auth;
 
 public class FirebaseAuthMiddleware
 {
@@ -17,6 +18,16 @@ public class FirebaseAuthMiddleware
 
    public async Task InvokeAsync(HttpContext context)
     {
+        var path = context.Request.Path.Value;
+
+        if (path != null &&
+            (path.StartsWith("/swagger") ||
+            path.StartsWith("/favicon")))
+        {
+            await _next(context);
+            return;
+        }
+
         var endpoint = context.GetEndpoint();
         var allowAnonymous =
             endpoint?.Metadata.GetMetadata<IAllowAnonymous>() != null;
@@ -42,6 +53,22 @@ public class FirebaseAuthMiddleware
         {
             var decoded =
                 await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, decoded.Uid),
+            };
+
+            foreach (var (key, value) in decoded.Claims)
+            {
+                if (value is string s)
+                    claims.Add(new Claim(key, s));
+                else if (value is bool b)
+                    claims.Add(new Claim(key, b.ToString().ToLower()));
+            }
+
+            var identity = new ClaimsIdentity(claims, "Firebase");
+            context.User = new ClaimsPrincipal(identity);
 
             context.Items["FirebaseUid"] = decoded.Uid;
             context.Items["FirebaseEmail"] =
