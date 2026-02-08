@@ -1,5 +1,5 @@
 using Api.Data;
-using Api.Middleware;
+using Api.Auth;
 using Api.Services;
 using Api.Interfaces;
 using DotNetEnv;
@@ -8,6 +8,8 @@ using Google.Apis.Auth.OAuth2;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +21,7 @@ if (builder.Environment.IsDevelopment())
 builder.Configuration.AddEnvironmentVariables();
 
 var disableAuth = builder.Configuration.GetValue<bool>("DISABLE_AUTH");
+Console.WriteLine("DISABLE_AUTH: " + disableAuth);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 if (!builder.Environment.IsEnvironment("Testing") && string.IsNullOrWhiteSpace(connectionString))
@@ -75,10 +78,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     }
 });
 
-builder.Services.AddScoped<IContentService, ContentService>();
+builder.Services.AddScoped<IContentQueryService, ContentQueryService>();
+builder.Services.AddScoped<IContentWriteService, ContentWriteService>();
 builder.Services.AddScoped<IUserResolutionService, UserResolutionService>();
 builder.Services.AddScoped<ISurveyService, SurveyService>();
 builder.Services.AddScoped<IOnboardingService, OnboardingService>();
+builder.Services.AddScoped<IAudioStorageService, AzureBlobAudioStorageService>();
 
 builder.Services.AddHttpLogging(opts =>
 {
@@ -89,7 +94,43 @@ builder.Services.AddHttpLogging(opts =>
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter JWT token"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
+builder.Services.AddAuthentication("Firebase")
+    .AddScheme<AuthenticationSchemeOptions, FirebasePassthroughAuthHandler>(
+        "Firebase", _ => { });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireClaim("admin", "true"));
+});
 
 var app = builder.Build();
 
@@ -167,6 +208,7 @@ else
     app.UseMiddleware<FirebaseAuthMiddleware>();
 }
 
+app.UseAuthorization();
 app.MapControllers();
 
 app.Run();

@@ -7,11 +7,11 @@ namespace Api.Controllers;
 [Route("api/content")]
 public class ContentController : ControllerBase
 {
-    private readonly IContentService _contentService;
+    private readonly IContentQueryService _contentService;
     private readonly IUserResolutionService _userResolver;
 
     public ContentController(
-        IContentService contentService,
+        IContentQueryService contentService,
         IUserResolutionService userResolver)
     {
         _contentService = contentService;

@@ -6,10 +6,9 @@ namespace Api.Mappers;
 public static class UserMapper
 {
     public static UserResponse ToResponse(this User user)
-        => new()
-        {
-            Id = user.Id,
-            Email = user.Email ?? string.Empty,
-            ShouldShowOnboarding = !user.HasCompletedOnboarding
-        };
+        => new UserResponse(
+            user.Id,
+            !user.HasCompletedOnboarding,
+            user.Email
+        );
 }
